@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                            http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- bean definitions here -->
+    <!--1.创建目标类-->
+    <bean id="userServiceId" class="com.sansan.aop.demo1.UserServiceImpl"/>
+
+    <!--2.创建切面类-->
+    <bean id="myAspectId" class="com.sansan.aop.demo1.MyAspect"/>
+
+    <!--3.创建代理类-->
+    <bean id="proxyServiceId" class="org.springframework.aop.framework.ProxyFactoryBean">
+        <property name="interfaces" value="com.sansan.aop.demo1.UserService"/>
+        <property name="target" ref="userServiceId"/>
+        <property name="interceptorNames" value="myAspectId"/>
+    </bean>
+
+</beans>

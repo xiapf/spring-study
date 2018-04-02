@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:property-placeholder location="classpath:com/sansan/tx/jdbcInfo.properties"/>
+
+    <!--工厂bean 生成代理：半自动-->
+    <!--创建数据源 读取配置文件中的配置信息-->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.driverClass}"/>
+        <property name="jdbcUrl" value="${jdbc.jdbcUrl}"/>
+        <property name="user" value="${jdbc.user}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+    <!--事务管理器-->
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--配置dao，注入数据源-->
+    <bean id="accountDao" class="com.sansan.tx.dao.AccountDaoImpl">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--配置service-->
+    <bean id="accountService" class="com.sansan.tx.service.AccountServiceImpl">
+        <property name="accountDao" ref="accountDao"/>
+    </bean>
+
+    <!--配置代理-->
+    <bean id="proxyAccountService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="proxyInterfaces" value="com.sansan.tx.service.AccountService"/>
+        <property name="target" ref="accountService"/>
+        <property name="transactionManager" ref="txManager"/>
+        <property name="transactionAttributes">
+            <props>
+                <prop key="transfer">PROPAGATION_REQUIRED,ISOLATION_DEFAULT</prop>
+            </props>
+        </property>
+    </bean>
+</beans>
